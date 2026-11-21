@@ -583,17 +583,78 @@ a {
 }
 
 /* Ornate photo frame */
+.story-gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 35px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.story-portraits-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.story-photo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 300px;
+  max-width: 380px;
+}
+
 .ornate-frame {
   position: relative;
   display: inline-block;
-  padding: 20px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.ornate-frame img {
+.story-portraits-row .ornate-frame img {
   width: 100%;
-  max-width: 450px;
+  aspect-ratio: 3 / 4.3;
+  object-fit: cover;
+  object-position: center 15%;
   border-radius: 8px;
-  box-shadow: 0 15px 50px rgba(74, 4, 4, 0.2);
+  box-shadow: 0 15px 45px rgba(74, 4, 4, 0.2);
+  display: block;
+}
+
+.story-ring-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.story-ring-row .story-photo-card {
+  max-width: 560px;
+  flex: 1 1 340px;
+}
+
+.story-ring-row .ornate-frame img {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 15px 45px rgba(74, 4, 4, 0.2);
+  display: block;
+  margin: 0 auto;
+}
+
+.photo-caption {
+  text-align: center;
+  font-family: var(--font-script);
+  font-size: 1.5rem;
+  color: var(--burgundy);
+  margin-top: 14px;
+  letter-spacing: 0.5px;
 }
 
 .ornate-frame::before {
@@ -608,7 +669,7 @@ a {
 .ornate-frame::after {
   content: '';
   position: absolute;
-  inset: 12px;
+  inset: 10px;
   border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: 10px;
   pointer-events: none;
@@ -1925,8 +1986,32 @@ a {
         </p>
       </div>
 
-      <div class="ornate-frame reveal-scale">
-        <img src="Ring_ceremony.jpeg" alt="Suraj and Shreya's ring ceremony — a close-up of the ring exchange with beautiful mehendi-adorned hands" loading="lazy" width="450" height="600">
+      <!-- Couple Portraits & Ring Ceremony Showcase -->
+      <div class="story-gallery reveal-scale">
+        <div class="story-portraits-row">
+          <div class="story-photo-card">
+            <div class="ornate-frame">
+              <img src="assets/couple_story_2.jpg" alt="Suraj and Shreya smiling together, a sweet and loving moment" loading="lazy" width="450" height="600">
+            </div>
+            <p class="photo-caption">Together in Love</p>
+          </div>
+
+          <div class="story-photo-card">
+            <div class="ornate-frame">
+              <img src="assets/couple_story_1.jpg" alt="Suraj and Shreya joyful in ethnic attire, celebrating their journey" loading="lazy" width="450" height="600">
+            </div>
+            <p class="photo-caption">A Lifetime of Smiles</p>
+          </div>
+        </div>
+
+        <div class="story-ring-row">
+          <div class="story-photo-card">
+            <div class="ornate-frame">
+              <img src="Ring_ceremony.jpeg" alt="Suraj and Shreya's ring ceremony — close-up of the ring exchange with beautiful mehendi-adorned hands" loading="lazy" width="550" height="367">
+            </div>
+            <p class="photo-caption">The Promise · Ring Ceremony</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

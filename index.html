@@ -1324,29 +1324,81 @@ a {
   letter-spacing: 2px;
 }
 
-/* Music toggle */
-.music-toggle {
+/* Music widget */
+.music-player-widget {
   position: fixed;
   bottom: 25px;
   right: 25px;
-  z-index: 999;
-  width: 50px;
-  height: 50px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(74, 4, 4, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 16px 6px 6px;
+  border-radius: 30px;
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3), 0 0 15px rgba(212, 175, 55, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.music-player-widget:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.music-toggle {
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--burgundy), var(--deep-maroon));
-  border: 2px solid var(--gold);
-  color: var(--gold-light);
-  font-size: 1.3rem;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  border: none;
+  color: var(--deep-maroon);
+  font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
 }
 
-.music-toggle:hover {
-  transform: scale(1.1);
+.music-label {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #FFF8E7;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Animated Equalizer bars */
+.music-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 16px;
+}
+
+.eq-bar {
+  width: 3px;
+  height: 100%;
+  background: var(--deep-maroon);
+  border-radius: 2px;
+  animation: eqBounce 0.8s ease-in-out infinite alternate;
+}
+
+.eq-bar:nth-child(1) { animation-duration: 0.65s; }
+.eq-bar:nth-child(2) { animation-duration: 1.05s; animation-delay: 0.15s; }
+.eq-bar:nth-child(3) { animation-duration: 0.8s; animation-delay: 0.3s; }
+
+@keyframes eqBounce {
+  0% { height: 3px; }
+  100% { height: 16px; }
 }
 
 /* ============================================
@@ -2354,10 +2406,19 @@ a {
   <p class="footer-sub">#SurajWedShreya · December 2026</p>
 </footer>
 
-<!-- Music toggle button (placeholder) -->
-<button class="music-toggle" id="musicToggle" aria-label="Toggle background music" title="Background Music">
-  🎵
-</button>
+<!-- Background Music Widget: Kalyanam Vybhogam -->
+<div class="music-player-widget" id="musicPlayerWidget" role="button" tabindex="0" aria-label="Toggle wedding music: Kalyanam Vybhogam">
+  <button class="music-toggle" id="musicToggle" aria-label="Play/Pause background music" title="Play 'Kalyanam Vybhogam'">
+    <span class="music-icon" id="musicIcon">🎵</span>
+    <span class="music-eq" id="musicEq" style="display:none;" aria-hidden="true">
+      <span class="eq-bar"></span>
+      <span class="eq-bar"></span>
+      <span class="eq-bar"></span>
+    </span>
+  </button>
+  <span class="music-label" id="musicLabel">Play Music ♫</span>
+</div>
+<div id="ytMusicPlayer" style="position:fixed; bottom:-200px; left:-200px; width:1px; height:1px; opacity:0; pointer-events:none;" aria-hidden="true"></div>
 
 <!-- ============================================
      JAVASCRIPT
@@ -2624,19 +2685,121 @@ a {
   });
 
   // ============================================
-  // MUSIC TOGGLE (placeholder)
+  // BACKGROUND WEDDING SONG: Kalyanam Vybhogam
+  // YouTube Video ID: DYcBV9OoAag
   // ============================================
+  var ytPlayer = null;
+  var isMusicPlaying = false;
+  var userInteracted = false;
+  var musicWidget = document.getElementById('musicPlayerWidget');
   var musicToggle = document.getElementById('musicToggle');
-  var musicPlaying = false;
+  var musicIcon = document.getElementById('musicIcon');
+  var musicEq = document.getElementById('musicEq');
+  var musicLabel = document.getElementById('musicLabel');
 
-  musicToggle.addEventListener('click', function() {
-    musicPlaying = !musicPlaying;
-    musicToggle.textContent = musicPlaying ? '🔇' : '🎵';
-    musicToggle.setAttribute('aria-label', musicPlaying ? 'Music paused' : 'Toggle background music');
-    // Audio placeholder - add an audio source URL here when available:
-    // var audio = document.getElementById('bgMusic');
-    // musicPlaying ? audio.play() : audio.pause();
-  });
+  // Load YouTube Iframe API
+  var ytScript = document.createElement('script');
+  ytScript.src = "https://www.youtube.com/iframe_api";
+  var firstScript = document.getElementsByTagName('script')[0];
+  firstScript.parentNode.insertBefore(ytScript, firstScript);
+
+  window.onYouTubeIframeAPIReady = function() {
+    ytPlayer = new YT.Player('ytMusicPlayer', {
+      height: '1',
+      width: '1',
+      videoId: 'DYcBV9OoAag',
+      playerVars: {
+        'autoplay': 0,
+        'controls': 0,
+        'disablekb': 1,
+        'fs': 0,
+        'loop': 1,
+        'playlist': 'DYcBV9OoAag',
+        'modestbranding': 1,
+        'playsinline': 1,
+        'rel': 0
+      },
+      events: {
+        'onReady': function() {
+          if (userInteracted) {
+            startPlayback();
+          }
+        },
+        'onStateChange': function(event) {
+          if (event.data === YT.PlayerState.PLAYING) {
+            isMusicPlaying = true;
+            musicIcon.style.display = 'none';
+            musicEq.style.display = 'flex';
+            musicLabel.textContent = 'Kalyanam Vybhogam ♪';
+            musicWidget.style.borderColor = '#FFD700';
+          } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+            isMusicPlaying = false;
+            musicIcon.style.display = 'block';
+            musicIcon.textContent = '🔇';
+            musicEq.style.display = 'none';
+            musicLabel.textContent = 'Play Song ♫';
+            musicWidget.style.borderColor = 'var(--gold)';
+          }
+        }
+      }
+    });
+  };
+
+  function startPlayback() {
+    if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+      try {
+        ytPlayer.playVideo();
+      } catch (err) {
+        console.log('Playback error:', err);
+      }
+    }
+  }
+
+  function pausePlayback() {
+    if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+      try {
+        ytPlayer.pauseVideo();
+      } catch (err) {
+        console.log('Pause error:', err);
+      }
+    }
+  }
+
+  function toggleMusic() {
+    userInteracted = true;
+    if (isMusicPlaying) {
+      pausePlayback();
+    } else {
+      startPlayback();
+    }
+  }
+
+  if (musicWidget) {
+    musicWidget.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleMusic();
+    });
+
+    musicWidget.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMusic();
+      }
+    });
+  }
+
+  // Attempt to start music smoothly on first touch/click anywhere on page
+  function firstInteractionPlay() {
+    if (!userInteracted) {
+      userInteracted = true;
+      startPlayback();
+    }
+    window.removeEventListener('click', firstInteractionPlay);
+    window.removeEventListener('touchstart', firstInteractionPlay);
+  }
+  window.addEventListener('click', firstInteractionPlay, { once: true, passive: true });
+  window.addEventListener('touchstart', firstInteractionPlay, { once: true, passive: true });
 
   // ============================================
   // SPARKLES (subtle decorative touches)

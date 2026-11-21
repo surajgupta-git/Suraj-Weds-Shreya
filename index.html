@@ -409,7 +409,7 @@ a {
 }
 
 /* ============================================
-   FLOATING PETALS
+   FLOATING PETALS SHOWER
    ============================================ */
 .petals-container {
   position: fixed;
@@ -421,13 +421,22 @@ a {
 
 .petal {
   position: absolute;
-  top: -40px;
+  top: -45px;
   opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .petal {
-    animation: petalFall linear forwards;
+  .petal.sway-1 {
+    animation: petalShower1 linear forwards;
+  }
+  .petal.sway-2 {
+    animation: petalShower2 linear forwards;
+  }
+  .petal.sway-3 {
+    animation: petalShower3 linear forwards;
   }
 }
 
@@ -1502,17 +1511,78 @@ a {
   50% { border-color: rgba(255, 215, 0, 0.8); }
 }
 
-@keyframes petalFall {
+@keyframes petalShower1 {
   0% {
     opacity: 0;
-    transform: translateY(-20px) rotate(0deg) translateX(0);
+    transform: translate3d(0, 0, 0) rotate(0deg) rotateY(0deg) scale(0.85);
   }
   10% {
-    opacity: 0.8;
+    opacity: 0.95;
+  }
+  28% {
+    transform: translate3d(45px, 28vh, 0) rotate(140deg) rotateX(160deg) scale(1);
+  }
+  55% {
+    transform: translate3d(-35px, 56vh, 0) rotate(310deg) rotateY(210deg) scale(0.9);
+  }
+  80% {
+    transform: translate3d(40px, 82vh, 0) rotate(480deg) rotateX(340deg) scale(0.95);
+  }
+  95% {
+    opacity: 0.9;
   }
   100% {
     opacity: 0;
-    transform: translateY(100vh) rotate(720deg) translateX(100px);
+    transform: translate3d(-20px, 108vh, 0) rotate(640deg) rotateY(420deg) scale(0.8);
+  }
+}
+
+@keyframes petalShower2 {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg) rotateX(0deg) scale(0.9);
+  }
+  10% {
+    opacity: 0.95;
+  }
+  30% {
+    transform: translate3d(-50px, 30vh, 0) rotate(-160deg) rotateY(180deg) scale(1.05);
+  }
+  60% {
+    transform: translate3d(40px, 62vh, 0) rotate(-330deg) rotateX(190deg) scale(0.92);
+  }
+  85% {
+    transform: translate3d(-30px, 88vh, 0) rotate(-490deg) rotateY(350deg) scale(0.98);
+  }
+  95% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(25px, 108vh, 0) rotate(-660deg) rotateX(440deg) scale(0.85);
+  }
+}
+
+@keyframes petalShower3 {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(30deg) scale(0.8);
+  }
+  12% {
+    opacity: 0.95;
+  }
+  35% {
+    transform: translate3d(30px, 35vh, 0) rotate(190deg) rotateY(160deg) scale(1);
+  }
+  70% {
+    transform: translate3d(-40px, 72vh, 0) rotate(380deg) rotateX(200deg) scale(0.9);
+  }
+  95% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(15px, 108vh, 0) rotate(580deg) rotateY(380deg) scale(0.82);
   }
 }
 
@@ -2418,30 +2488,63 @@ a {
   }
 
   // ============================================
-  // FLOATING PETALS
+  // FLOWER PETAL SHOWER OVER ENTIRE WEBSITE
   // ============================================
   if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
     var petalsContainer = document.getElementById('petalsContainer');
-    var petalColors = ['#FF9933', '#FFD700', '#FF6600', '#E8740C', '#FFC107', '#FF7043'];
-    var maxPetals = window.innerWidth < 768 ? 8 : 15;
-    var petalCount = 0;
+    
+    // Rich wedding flower petal palette: Marigold, Royal Rose, Saffron, and Jasmine
+    var petalPalette = [
+      { fill: '#FF9933', type: 'marigold' },
+      { fill: '#FFD700', type: 'marigold' },
+      { fill: '#FF6F00', type: 'marigold' },
+      { fill: '#FFB300', type: 'marigold' },
+      { fill: '#D32F2F', type: 'rose' },
+      { fill: '#C2185B', type: 'rose' },
+      { fill: '#E91E63', type: 'rose' },
+      { fill: '#AD1457', type: 'rose' },
+      { fill: '#FFF8E7', type: 'jasmine' },
+      { fill: '#FCE4EC', type: 'jasmine' }
+    ];
 
-    function createPetal() {
-      if (petalCount >= maxPetals) return;
+    var maxPetals = window.innerWidth < 768 ? 24 : 45;
+    var petalCount = 0;
+    var swayStyles = ['sway-1', 'sway-2', 'sway-3'];
+
+    function createPetal(customX, customY) {
+      if (petalCount >= maxPetals && customX === undefined) return;
+
+      var petalObj = petalPalette[Math.floor(Math.random() * petalPalette.length)];
+      var swayClass = swayStyles[Math.floor(Math.random() * swayStyles.length)];
+      var size = 14 + Math.random() * 16;
+      var duration = 5.5 + Math.random() * 5.5;
+      var delay = customX !== undefined ? 0 : Math.random() * 1.5;
+      var startX = customX !== undefined ? (customX + (Math.random() * 60 - 30)) : (Math.random() * window.innerWidth);
 
       var petal = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      petal.setAttribute('class', 'petal');
-      petal.setAttribute('width', '20');
-      petal.setAttribute('height', '20');
-      petal.setAttribute('viewBox', '0 0 20 20');
-      petal.innerHTML = '<ellipse cx="10" cy="10" rx="6" ry="9" fill="' + petalColors[Math.floor(Math.random() * petalColors.length)] + '" opacity="0.7" transform="rotate(' + (Math.random() * 360) + ' 10 10)"/>';
+      petal.setAttribute('class', 'petal ' + swayClass);
+      petal.setAttribute('width', size);
+      petal.setAttribute('height', size);
+      petal.setAttribute('viewBox', '0 0 30 30');
 
-      var startX = Math.random() * window.innerWidth;
-      var duration = 8 + Math.random() * 7;
-      var delay = Math.random() * 2;
-      var size = 12 + Math.random() * 14;
+      var angle = Math.floor(Math.random() * 360);
+      var opacity = 0.75 + Math.random() * 0.25;
+
+      if (petalObj.type === 'rose') {
+        // Heart/curved teardrop rose petal
+        petal.innerHTML = '<path d="M15 3 C10 3, 5 8, 7 17 C9 24, 15 28, 15 28 C15 28, 21 24, 23 17 C25 8, 20 3, 15 3Z" fill="' + petalObj.fill + '" opacity="' + opacity + '" transform="rotate(' + angle + ' 15 15)"/>';
+      } else if (petalObj.type === 'marigold') {
+        // Full rounded marigold petal
+        petal.innerHTML = '<ellipse cx="15" cy="15" rx="8" ry="13" fill="' + petalObj.fill + '" opacity="' + opacity + '" transform="rotate(' + angle + ' 15 15)"/><path d="M15 5 L15 25" stroke="#FFA000" stroke-width="0.8" opacity="0.4" transform="rotate(' + angle + ' 15 15)"/>';
+      } else {
+        // Delicate jasmine/mogra bud petal
+        petal.innerHTML = '<ellipse cx="15" cy="15" rx="6" ry="11" fill="' + petalObj.fill + '" stroke="#D4AF37" stroke-width="0.5" opacity="' + opacity + '" transform="rotate(' + angle + ' 15 15)"/>';
+      }
 
       petal.style.left = startX + 'px';
+      if (customY !== undefined) {
+        petal.style.top = customY + 'px';
+      }
       petal.style.width = size + 'px';
       petal.style.height = size + 'px';
       petal.style.animationDuration = duration + 's';
@@ -2450,7 +2553,6 @@ a {
       petalsContainer.appendChild(petal);
       petalCount++;
 
-      // Remove petal after animation completes
       setTimeout(function() {
         if (petal.parentNode) {
           petal.parentNode.removeChild(petal);
@@ -2459,17 +2561,28 @@ a {
       }, (duration + delay) * 1000);
     }
 
-    // Create initial petals
-    for (var i = 0; i < 6; i++) {
-      setTimeout(createPetal, i * 600);
+    // Instantly fill screen on load so shower is active from second 0
+    for (var i = 0; i < (window.innerWidth < 768 ? 12 : 25); i++) {
+      createPetal(Math.random() * window.innerWidth, Math.random() * (window.innerHeight * 0.7));
     }
 
-    // Keep creating petals
+    // Continuous rich floral shower
     setInterval(function() {
       if (petalCount < maxPetals) {
         createPetal();
       }
-    }, 2500);
+    }, 220);
+
+    // Interactive petal shower burst on click/tap
+    window.addEventListener('click', function(e) {
+      // Don't burst if clicking links or buttons
+      if (e.target.closest('a') || e.target.closest('button')) return;
+      for (var b = 0; b < 6; b++) {
+        setTimeout(function() {
+          createPetal(e.clientX, e.clientY);
+        }, b * 60);
+      }
+    });
   }
 
 

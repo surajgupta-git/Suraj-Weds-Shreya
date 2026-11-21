@@ -441,6 +441,50 @@ a {
 }
 
 /* ============================================
+   FLOWER GARLAND BORDERS (LEFT & RIGHT)
+   ============================================ */
+.garland-border {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 75px;
+  z-index: 997;
+  pointer-events: none;
+  opacity: 0.5; /* 50% opaque */
+  background-repeat: repeat-y;
+  background-size: 75px auto;
+  transition: opacity 0.3s ease;
+}
+
+.garland-left {
+  left: 0;
+  background-image: url('assets/garland_left_full.png');
+  background-position: left top;
+}
+
+.garland-right {
+  right: 0;
+  background-image: url('assets/garland_right_full.png');
+  background-position: right top;
+}
+
+@media (max-width: 900px) {
+  .garland-border {
+    width: 48px;
+    background-size: 48px auto;
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 480px) {
+  .garland-border {
+    width: 32px;
+    background-size: 32px auto;
+    opacity: 0.4;
+  }
+}
+
+/* ============================================
    SECTION SHARED STYLES
    ============================================ */
 .section {
@@ -1747,6 +1791,10 @@ a {
 </style>
 </head>
 <body>
+
+<!-- 50% Opaque Left & Right Marigold Flower Garlands -->
+<div class="garland-border garland-left" aria-hidden="true"></div>
+<div class="garland-border garland-right" aria-hidden="true"></div>
 
 <!-- ============================================
      NAVIGATION

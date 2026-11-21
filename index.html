@@ -441,50 +441,6 @@ a {
 }
 
 /* ============================================
-   FLOWER GARLAND BORDERS (LEFT & RIGHT)
-   ============================================ */
-.garland-border {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 75px;
-  z-index: 997;
-  pointer-events: none;
-  opacity: 0.5; /* 50% opaque */
-  background-repeat: repeat-y;
-  background-size: 75px auto;
-  transition: opacity 0.3s ease;
-}
-
-.garland-left {
-  left: 0;
-  background-image: url('assets/garland_left_full.png');
-  background-position: left top;
-}
-
-.garland-right {
-  right: 0;
-  background-image: url('assets/garland_right_full.png');
-  background-position: right top;
-}
-
-@media (max-width: 900px) {
-  .garland-border {
-    width: 48px;
-    background-size: 48px auto;
-    opacity: 0.45;
-  }
-}
-
-@media (max-width: 480px) {
-  .garland-border {
-    width: 32px;
-    background-size: 32px auto;
-    opacity: 0.4;
-  }
-}
-
-/* ============================================
    SECTION SHARED STYLES
    ============================================ */
 .section {
@@ -1792,10 +1748,6 @@ a {
 </head>
 <body>
 
-<!-- 50% Opaque Left & Right Marigold Flower Garlands -->
-<div class="garland-border garland-left" aria-hidden="true"></div>
-<div class="garland-border garland-right" aria-hidden="true"></div>
-
 <!-- ============================================
      NAVIGATION
      ============================================ -->
@@ -2466,7 +2418,7 @@ a {
   </button>
   <span class="music-label" id="musicLabel">Play Music ♫</span>
 </div>
-<div id="ytMusicPlayer" style="position:fixed; bottom:-200px; left:-200px; width:1px; height:1px; opacity:0; pointer-events:none;" aria-hidden="true"></div>
+<audio id="bgAudio" src="assets/kalyanam_vybhogam.m4a" preload="auto" loop playsinline></audio>
 
 <!-- ============================================
      JAVASCRIPT
@@ -2734,131 +2686,112 @@ a {
 
   // ============================================
   // BACKGROUND WEDDING SONG: Kalyanam Vybhogam
-  // YouTube Video ID: DYcBV9OoAag
+  // Native HTML5 Audio with 10s start & Autoplay
   // ============================================
-  var ytPlayer = null;
+  var audio = document.getElementById('bgAudio');
   var isMusicPlaying = false;
-  var userInteracted = false;
   var musicWidget = document.getElementById('musicPlayerWidget');
-  var musicToggle = document.getElementById('musicToggle');
   var musicIcon = document.getElementById('musicIcon');
   var musicEq = document.getElementById('musicEq');
   var musicLabel = document.getElementById('musicLabel');
 
-  // Load YouTube Iframe API
-  var ytScript = document.createElement('script');
-  ytScript.src = "https://www.youtube.com/iframe_api";
-  var firstScript = document.getElementsByTagName('script')[0];
-  firstScript.parentNode.insertBefore(ytScript, firstScript);
+  function updateMusicUI(playing) {
+    isMusicPlaying = playing;
+    if (playing) {
+      musicIcon.style.display = 'none';
+      musicEq.style.display = 'flex';
+      musicLabel.textContent = 'Kalyanam Vybhogam ♪';
+      if (musicWidget) musicWidget.style.borderColor = '#FFD700';
+    } else {
+      musicIcon.style.display = 'block';
+      musicIcon.textContent = '🔇';
+      musicEq.style.display = 'none';
+      musicLabel.textContent = 'Play Song ♫';
+      if (musicWidget) musicWidget.style.borderColor = 'var(--gold)';
+    }
+  }
 
-  window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('ytMusicPlayer', {
-      height: '1',
-      width: '1',
-      videoId: 'DYcBV9OoAag',
-      playerVars: {
-        'autoplay': 1,
-        'start': 10,
-        'controls': 0,
-        'disablekb': 1,
-        'fs': 0,
-        'loop': 1,
-        'playlist': 'DYcBV9OoAag',
-        'modestbranding': 1,
-        'playsinline': 1,
-        'rel': 0
-      },
-      events: {
-        'onReady': function(event) {
-          try {
-            event.target.seekTo(10, true);
-            event.target.playVideo();
-          } catch (e) {}
-        },
-        'onStateChange': function(event) {
-          if (event.data === YT.PlayerState.PLAYING) {
-            isMusicPlaying = true;
-            musicIcon.style.display = 'none';
-            musicEq.style.display = 'flex';
-            musicLabel.textContent = 'Kalyanam Vybhogam ♪';
-            musicWidget.style.borderColor = '#FFD700';
-          } else if (event.data === YT.PlayerState.ENDED) {
-            // Loop seamlessly from second 10
-            event.target.seekTo(10, true);
-            event.target.playVideo();
-          } else if (event.data === YT.PlayerState.PAUSED) {
-            isMusicPlaying = false;
-            musicIcon.style.display = 'block';
-            musicIcon.textContent = '🔇';
-            musicEq.style.display = 'none';
-            musicLabel.textContent = 'Play Song ♫';
-            musicWidget.style.borderColor = 'var(--gold)';
-          }
-        }
+  function startAudio() {
+    if (!audio) return;
+    try {
+      if (audio.currentTime < 10) {
+        audio.currentTime = 10;
+      }
+      var promise = audio.play();
+      if (promise !== undefined) {
+        promise.then(function() {
+          updateMusicUI(true);
+        }).catch(function(err) {
+          // Autoplay blocked by browser until first gesture
+        });
+      }
+    } catch(e) {}
+  }
+
+  function pauseAudio() {
+    if (!audio) return;
+    audio.pause();
+    updateMusicUI(false);
+  }
+
+  function toggleAudio() {
+    if (isMusicPlaying) {
+      pauseAudio();
+    } else {
+      startAudio();
+    }
+  }
+
+  if (audio) {
+    // Start at second 10
+    audio.addEventListener('loadedmetadata', function() {
+      if (audio.currentTime < 10) {
+        audio.currentTime = 10;
       }
     });
-  };
 
-  function startPlayback() {
-    if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-      try {
-        var currentTime = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
-        if (currentTime < 10) {
-          ytPlayer.seekTo(10, true);
-        }
-        ytPlayer.playVideo();
-      } catch (err) {
-        console.log('Playback error:', err);
-      }
-    }
-  }
+    // Loop from second 10 seamlessly
+    audio.addEventListener('ended', function() {
+      audio.currentTime = 10;
+      audio.play();
+    });
 
-  function pausePlayback() {
-    if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-      try {
-        ytPlayer.pauseVideo();
-      } catch (err) {
-        console.log('Pause error:', err);
-      }
-    }
-  }
-
-  function toggleMusic() {
-    userInteracted = true;
-    if (isMusicPlaying) {
-      pausePlayback();
-    } else {
-      startPlayback();
-    }
+    audio.addEventListener('play', function() { updateMusicUI(true); });
+    audio.addEventListener('pause', function() { updateMusicUI(false); });
   }
 
   if (musicWidget) {
     musicWidget.addEventListener('click', function(e) {
       e.stopPropagation();
-      toggleMusic();
+      toggleAudio();
     });
 
     musicWidget.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         e.stopPropagation();
-        toggleMusic();
+        toggleAudio();
       }
     });
   }
 
-  // Trigger autoplay on first gesture (scroll, touch, click, pointer) across the page
-  var gestureEvents = ['click', 'touchstart', 'pointerdown', 'scroll'];
-  function firstInteractionPlay() {
-    if (!isMusicPlaying) {
-      startPlayback();
+  // 1. Try immediate autoplay on page load
+  startAudio();
+  window.addEventListener('load', startAudio);
+  document.addEventListener('DOMContentLoaded', startAudio);
+
+  // 2. Immediate playback on ANY initial gesture (scroll, touch, click, pointer) without clicking button
+  var unlockEvents = ['touchstart', 'touchend', 'pointerdown', 'scroll', 'click', 'keydown', 'wheel'];
+  function unlockAutoplay() {
+    if (audio && audio.paused) {
+      startAudio();
     }
-    gestureEvents.forEach(function(evt) {
-      window.removeEventListener(evt, firstInteractionPlay);
+    unlockEvents.forEach(function(evt) {
+      window.removeEventListener(evt, unlockAutoplay, true);
     });
   }
-  gestureEvents.forEach(function(evt) {
-    window.addEventListener(evt, firstInteractionPlay, { once: true, passive: true });
+  unlockEvents.forEach(function(evt) {
+    window.addEventListener(evt, unlockAutoplay, { capture: true, once: true, passive: true });
   });
 
   // ============================================

@@ -2418,7 +2418,7 @@ a {
   </button>
   <span class="music-label" id="musicLabel">Play Music ♫</span>
 </div>
-<audio id="bgAudio" src="assets/kalyanam_vybhogam.m4a" preload="auto" loop playsinline></audio>
+<audio id="bgAudio" src="assets/kalyanam_vybhogam.m4a?v=2" autoplay preload="auto" loop playsinline></audio>
 
 <!-- ============================================
      JAVASCRIPT
@@ -2686,7 +2686,7 @@ a {
 
   // ============================================
   // BACKGROUND WEDDING SONG: Kalyanam Vybhogam
-  // Native HTML5 Audio with 10s start & Autoplay
+  // Native HTML5 Audio — Pre-trimmed at 10s & Autoplay
   // ============================================
   var audio = document.getElementById('bgAudio');
   var isMusicPlaying = false;
@@ -2698,15 +2698,17 @@ a {
   function updateMusicUI(playing) {
     isMusicPlaying = playing;
     if (playing) {
-      musicIcon.style.display = 'none';
-      musicEq.style.display = 'flex';
-      musicLabel.textContent = 'Kalyanam Vybhogam ♪';
+      if (musicIcon) musicIcon.style.display = 'none';
+      if (musicEq) musicEq.style.display = 'flex';
+      if (musicLabel) musicLabel.textContent = 'Kalyanam Vybhogam ♪';
       if (musicWidget) musicWidget.style.borderColor = '#FFD700';
     } else {
-      musicIcon.style.display = 'block';
-      musicIcon.textContent = '🔇';
-      musicEq.style.display = 'none';
-      musicLabel.textContent = 'Play Song ♫';
+      if (musicIcon) {
+        musicIcon.style.display = 'block';
+        musicIcon.textContent = '🔇';
+      }
+      if (musicEq) musicEq.style.display = 'none';
+      if (musicLabel) musicLabel.textContent = 'Play Song ♫';
       if (musicWidget) musicWidget.style.borderColor = 'var(--gold)';
     }
   }
@@ -2714,15 +2716,12 @@ a {
   function startAudio() {
     if (!audio) return;
     try {
-      if (audio.currentTime < 10) {
-        audio.currentTime = 10;
-      }
-      var promise = audio.play();
-      if (promise !== undefined) {
-        promise.then(function() {
+      var p = audio.play();
+      if (p !== undefined) {
+        p.then(function() {
           updateMusicUI(true);
         }).catch(function(err) {
-          // Autoplay blocked by browser until first gesture
+          // Browser autoplay restriction waiting for first user gesture
         });
       }
     } catch(e) {}
@@ -2743,21 +2742,12 @@ a {
   }
 
   if (audio) {
-    // Start at second 10
-    audio.addEventListener('loadedmetadata', function() {
-      if (audio.currentTime < 10) {
-        audio.currentTime = 10;
-      }
-    });
-
-    // Loop from second 10 seamlessly
-    audio.addEventListener('ended', function() {
-      audio.currentTime = 10;
-      audio.play();
-    });
-
     audio.addEventListener('play', function() { updateMusicUI(true); });
     audio.addEventListener('pause', function() { updateMusicUI(false); });
+    audio.addEventListener('ended', function() {
+      audio.currentTime = 0;
+      audio.play();
+    });
   }
 
   if (musicWidget) {
@@ -2775,23 +2765,43 @@ a {
     });
   }
 
-  // 1. Try immediate autoplay on page load
+  // 1. Immediate unmuted play attempt across all lifecycle hooks
   startAudio();
-  window.addEventListener('load', startAudio);
-  document.addEventListener('DOMContentLoaded', startAudio);
-
-  // 2. Immediate playback on ANY initial gesture (scroll, touch, click, pointer) without clicking button
-  var unlockEvents = ['touchstart', 'touchend', 'pointerdown', 'scroll', 'click', 'keydown', 'wheel'];
-  function unlockAutoplay() {
-    if (audio && audio.paused) {
-      startAudio();
-    }
-    unlockEvents.forEach(function(evt) {
-      window.removeEventListener(evt, unlockAutoplay, true);
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startAudio);
   }
+  window.addEventListener('load', startAudio);
+  window.addEventListener('pageshow', startAudio);
+  window.addEventListener('focus', startAudio);
+
+  // 2. Immediate unlock on ANY initial user micro-action (touch, scroll, swipe, key) without clicking button
+  var unlockEvents = [
+    'touchstart', 'touchend', 'touchmove',
+    'pointerdown', 'pointerup', 'pointermove',
+    'scroll', 'wheel', 'click', 'keydown'
+  ];
+  var hasUnlocked = false;
+
+  function unlockAutoplay() {
+    if (hasUnlocked) return;
+    if (audio) {
+      var p = audio.play();
+      if (p !== undefined) {
+        p.then(function() {
+          hasUnlocked = true;
+          updateMusicUI(true);
+          unlockEvents.forEach(function(evt) {
+            window.removeEventListener(evt, unlockAutoplay, true);
+            document.removeEventListener(evt, unlockAutoplay, true);
+          });
+        }).catch(function() {});
+      }
+    }
+  }
+
   unlockEvents.forEach(function(evt) {
-    window.addEventListener(evt, unlockAutoplay, { capture: true, once: true, passive: true });
+    window.addEventListener(evt, unlockAutoplay, { capture: true, passive: true });
+    document.addEventListener(evt, unlockAutoplay, { capture: true, passive: true });
   });
 
   // ============================================

@@ -499,8 +499,9 @@ a {
    ============================================ */
 .reveal {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateY(45px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .reveal.visible {
@@ -510,35 +511,38 @@ a {
 
 .reveal-left {
   opacity: 0;
-  transform: translateX(-60px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateX(-55px) translateY(20px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .reveal-left.visible {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) translateY(0);
 }
 
 .reveal-right {
   opacity: 0;
-  transform: translateX(60px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateX(55px) translateY(20px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .reveal-right.visible {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) translateY(0);
 }
 
 .reveal-scale {
   opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: scale(0.92) translateY(25px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .reveal-scale.visible {
   opacity: 1;
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1388,8 +1392,8 @@ a {
 /* Music widget */
 .music-player-widget {
   position: fixed;
-  bottom: 25px;
-  right: 25px;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: max(20px, env(safe-area-inset-left));
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -1794,6 +1798,230 @@ a {
   }
 }
 
+/* ============================================
+   SCROLL ANIMATIONS & AMBIENT SCENE THEMES
+   Reference: ritvik-weds-vineesha
+   ============================================ */
+
+/* 1. Ambient Dynamic Scene Glow */
+.ambient-scene-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.22;
+  transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+  will-change: background;
+}
+
+body[data-scene="royal"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 25%, #8B0000 0%, transparent 65%);
+  opacity: 0.22;
+}
+
+body[data-scene="story"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 45%, #D4AF37 0%, transparent 60%);
+  opacity: 0.16;
+}
+
+body[data-scene="mehendi"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 50%, #0F5132 0%, #198754 35%, transparent 70%);
+  opacity: 0.26;
+}
+
+body[data-scene="traditional"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 50%, #795548 0%, #D4AF37 40%, transparent 70%);
+  opacity: 0.20;
+}
+
+body[data-scene="haldi"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 50%, #FFB703 0%, #FB8500 40%, transparent 70%);
+  opacity: 0.28;
+}
+
+body[data-scene="alaka"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 50%, #D84315 0%, #F57C00 35%, transparent 70%);
+  opacity: 0.24;
+}
+
+body[data-scene="reception"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 50%, #1A237E 0%, #311B92 40%, transparent 75%);
+  opacity: 0.30;
+}
+
+body[data-scene="wedding"] .ambient-scene-glow {
+  background: radial-gradient(circle at 50% 50%, #B71C1C 0%, #FFD700 40%, transparent 70%);
+  opacity: 0.32;
+}
+
+/* 2. Rotating Royal Wedding Seal Badge */
+.wedding-seal {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFDF8 45%, #F4E8D0 100%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 10px 30px rgba(74, 4, 4, 0.28), 0 0 16px rgba(212, 175, 55, 0.4);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.65) rotate(-35deg);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s, box-shadow 0.3s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wedding-seal.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) rotate(0deg);
+}
+
+.wedding-seal:hover {
+  transform: scale(1.09);
+  box-shadow: 0 14px 40px rgba(74, 4, 4, 0.4), 0 0 24px rgba(255, 215, 0, 0.65);
+}
+
+.wedding-seal svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: orbitSeal 16s linear infinite;
+}
+
+@keyframes orbitSeal {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.seal-inner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #8B0000 0%, #4A0404 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 8px rgba(139, 0, 0, 0.4);
+  border: 1px solid var(--gold-light);
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.wedding-seal:hover .seal-inner {
+  transform: scale(1.12);
+}
+
+.seal-icon {
+  font-size: 1.15rem;
+  color: var(--gold-light);
+  line-height: 1;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.85);
+}
+
+/* 3. Active Illuminated Timeline Progress Thread */
+.timeline-progress {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 3px;
+  height: 0%;
+  max-height: 100%;
+  background: linear-gradient(to bottom, #FFD700 0%, #FFA000 60%, #FFD700 100%);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.9), 0 0 4px #FFF;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  z-index: 2;
+  transition: height 0.08s linear;
+  pointer-events: none;
+}
+
+.timeline-progress-spark {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  background: #FFF8E7;
+  border: 2px solid #FFD700;
+  border-radius: 50%;
+  transform: translate(-50%, 50%);
+  box-shadow: 0 0 18px 4px #FFD700, 0 0 8px #FFF;
+  z-index: 4;
+}
+
+@media (max-width: 768px) {
+  .timeline-progress {
+    left: 20px;
+    transform: none;
+  }
+  .timeline-progress-spark {
+    left: 1px;
+  }
+}
+
+/* 4. Enhanced 3D Event Card Scroll Interaction */
+.timeline-event .event-card {
+  transform: translateY(35px) perspective(1000px) rotateX(2.5deg);
+  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.75s ease, border-color 0.5s ease;
+  will-change: transform;
+}
+
+.timeline-event.visible .event-card {
+  transform: translateY(0) perspective(1000px) rotateX(0deg);
+}
+
+.timeline-event .event-card:hover {
+  transform: translateY(-8px) perspective(1000px) rotateX(-1deg) scale(1.015);
+  box-shadow: 0 25px 60px rgba(74, 4, 4, 0.22), 0 0 25px rgba(212, 175, 55, 0.35);
+}
+
+.event-medallion img {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-event:hover .event-medallion img {
+  transform: scale(1.15) rotate(5deg);
+}
+
+/* 5. Reception Fairy Lights Twinkle */
+.fairy-lights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35px;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.light-node {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #FFF;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 3px #FFD700, 0 0 4px #FFF;
+  opacity: 0.6;
+  animation: fairyFlicker 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes fairyFlicker {
+  0% { transform: scale(0.7); opacity: 0.25; filter: drop-shadow(0 0 2px #FFD700); }
+  50% { transform: scale(1.4); opacity: 0.95; filter: drop-shadow(0 0 12px #FFD700); }
+  100% { transform: scale(0.8); opacity: 0.45; filter: drop-shadow(0 0 4px #FFD700); }
+}
+
 /* Print styles */
 @media print {
   .nav, .petals-container, .music-toggle, .scroll-indicator {
@@ -1807,7 +2035,10 @@ a {
 }
 </style>
 </head>
-<body>
+<body data-scene="royal">
+
+<!-- Ambient dynamic atmospheric scene glow -->
+<div class="ambient-scene-glow" id="ambientSceneGlow" aria-hidden="true"></div>
 
 <!-- ============================================
      NAVIGATION
@@ -1833,7 +2064,7 @@ a {
 <!-- ============================================
      HERO SECTION
      ============================================ -->
-<section class="hero" id="home">
+<section class="hero" id="home" data-scene="royal">
   <div class="hero-bg" id="heroBg"></div>
   <div class="hero-overlay"></div>
 
@@ -1925,7 +2156,7 @@ a {
 <!-- ============================================
      OUR STORY SECTION
      ============================================ -->
-<section class="section story-section" id="story">
+<section class="section story-section" id="story" data-scene="story">
   <div class="container">
     <!-- Diya decorations -->
     <div class="diya-container reveal" aria-hidden="true">
@@ -2034,7 +2265,7 @@ a {
 <!-- ============================================
      EVENTS / TIMELINE SECTION
      ============================================ -->
-<section class="section events-section" id="events">
+<section class="section events-section" id="events" data-scene="events">
   <div class="container">
     <h2 class="section-title reveal">Wedding Celebrations</h2>
     <p class="section-subtitle reveal">Three Days of Joy & Festivities</p>
@@ -2055,15 +2286,20 @@ a {
       <div class="divider-line"></div>
     </div>
 
-    <div class="timeline">
+    <div class="timeline" id="weddingTimeline">
+      <!-- Active illuminated timeline progress thread -->
+      <div class="timeline-progress" id="timelineProgress" aria-hidden="true">
+        <div class="timeline-progress-spark" id="timelineSpark"></div>
+      </div>
+
       <!-- ========== DAY 1 ========== -->
-      <div class="day-header reveal">
+      <div class="day-header reveal" data-scene="mehendi">
         <div class="day-badge">Day One</div>
         <p class="day-date">Thursday, December 17, 2026</p>
       </div>
 
       <!-- Mehendi -->
-      <div class="timeline-event left reveal-left">
+      <div class="timeline-event left reveal-left" id="event-mehendi" data-scene="mehendi">
         <div class="event-card">
           <div class="event-card-header">
             <div class="event-medallion" style="background: linear-gradient(135deg, #FFFDE7, #FFF9C4); border-color: #E65100;">
@@ -2092,13 +2328,13 @@ a {
       </div>
 
       <!-- ========== DAY 2 ========== -->
-      <div class="day-header reveal">
+      <div class="day-header reveal" data-scene="traditional">
         <div class="day-badge">Day Two</div>
         <p class="day-date">Friday, December 18, 2026</p>
       </div>
 
       <!-- Pandiri Rata -->
-      <div class="timeline-event right reveal-right">
+      <div class="timeline-event right reveal-right" id="event-pandiri" data-scene="traditional">
         <div class="event-card">
           <div class="event-card-header">
             <div class="event-medallion" style="background: linear-gradient(135deg, #FFF0F5, #FCE4EC); border-color: #D81B60;">
@@ -2123,7 +2359,7 @@ a {
       </div>
 
       <!-- Haldi -->
-      <div class="timeline-event left reveal-left">
+      <div class="timeline-event left reveal-left" id="event-haldi" data-scene="haldi">
         <div class="event-card">
           <div class="event-card-header">
             <div class="event-medallion" style="background: linear-gradient(135deg, #FFFDE7, #FFF59D); border-color: #F57F17; width: 68px; height: 68px;">
@@ -2149,7 +2385,7 @@ a {
       </div>
 
       <!-- Sangeet / Alaka Sambaram -->
-      <div class="timeline-event right reveal-right">
+      <div class="timeline-event right reveal-right" id="event-alaka" data-scene="alaka">
         <div class="event-card">
           <div class="event-card-header">
             <div class="event-medallion" style="background: linear-gradient(135deg, #FFF8E1, #FFECB3); border-color: #FF8F00; width: 68px; height: 68px;">
@@ -2174,8 +2410,14 @@ a {
       </div>
 
       <!-- Reception -->
-      <div class="timeline-event left reveal-left">
+      <div class="timeline-event left reveal-left" id="event-reception" data-scene="reception">
         <div class="event-card">
+          <div class="fairy-lights" aria-hidden="true">
+            <span class="light-node" style="top:8px;left:18%;"></span>
+            <span class="light-node" style="top:18px;left:42%;animation-delay:0.7s;"></span>
+            <span class="light-node" style="top:10px;left:68%;animation-delay:1.4s;"></span>
+            <span class="light-node" style="top:16px;left:88%;animation-delay:0.3s;"></span>
+          </div>
           <div class="event-card-header">
             <div class="event-medallion" style="background: linear-gradient(135deg, #EDE7F6, #D1C4E9); border-color: #512DA8; width: 68px; height: 68px;">
               <img src="assets/reception_couple.png" alt="Reception Couple" loading="lazy">
@@ -2208,13 +2450,13 @@ a {
       </div>
 
       <!-- ========== DAY 3 ========== -->
-      <div class="day-header reveal">
+      <div class="day-header reveal" data-scene="wedding">
         <div class="day-badge">Day Three</div>
         <p class="day-date">Saturday, December 19, 2026</p>
       </div>
 
       <!-- Wedding Ceremony -->
-      <div class="timeline-event right reveal-right">
+      <div class="timeline-event right reveal-right" id="event-subhalagnam" data-scene="wedding">
         <div class="event-card card-wedding">
           <div class="event-card-header">
             <div class="event-medallion">
@@ -2255,7 +2497,7 @@ a {
 <!-- ============================================
      VENUES SECTION
      ============================================ -->
-<section class="section venues-section" id="venues">
+<section class="section venues-section" id="venues" data-scene="venues">
   <div class="container">
     <h2 class="section-title reveal">Venues</h2>
     <p class="section-subtitle reveal">Where The Celebrations Happen</p>
@@ -2309,7 +2551,7 @@ a {
 <!-- ============================================
      SHARE YOUR MOMENTS / PHOTO UPLOAD SECTION
      ============================================ -->
-<section class="section upload-section" id="upload">
+<section class="section upload-section" id="upload" data-scene="photos">
   <div class="container">
     <h2 class="section-title reveal">Share Your Moments</h2>
     <p class="section-subtitle reveal">Capture &amp; Cherish Together</p>
@@ -2370,7 +2612,7 @@ a {
 <!-- ============================================
      CONTACT SECTION
      ============================================ -->
-<section class="section rsvp-section" id="contact">
+<section class="section rsvp-section" id="contact" data-scene="contact">
   <div class="container">
     <h2 class="section-title reveal">Contact</h2>
     <p class="section-subtitle reveal">We'd Love To Hear From You</p>
@@ -2504,6 +2746,21 @@ a {
   <span class="music-label" id="musicLabel">Play Music ♫</span>
 </div>
 <audio id="bgAudio" src="assets/kalyanam_vybhogam.m4a?v=2" autoplay preload="auto" loop playsinline></audio>
+
+<!-- Rotating Wedding Seal Badge (Scroll-reactive) -->
+<a class="wedding-seal" id="weddingSeal" href="#events" aria-label="Explore celebrations and ceremonies">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <defs>
+      <path id="sealPath" d="M50 50m-37 0a37 37 0 1 1 74 0a37 37 0 1 1-74 0"/>
+    </defs>
+    <text font-family="'Cinzel', serif" font-size="7.6" font-weight="700" letter-spacing="2.2" fill="#8B0000">
+      <textPath href="#sealPath" startOffset="0%">SURAJ &bull; SHREYA &bull; DEC 2026 &bull;&nbsp;</textPath>
+    </text>
+  </svg>
+  <div class="seal-inner">
+    <span class="seal-icon">✦</span>
+  </div>
+</a>
 
 <!-- ============================================
      JAVASCRIPT
@@ -2728,7 +2985,140 @@ a {
         }, b * 60);
       }
     });
+
+    // Celebratory Petal Bursts on Entering Events & Subhalagnam (Reference: ritvik-weds-vineesha)
+    var hasBurstedEvents = false;
+    var hasBurstedWedding = false;
+    var eventsObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && !hasBurstedEvents) {
+          hasBurstedEvents = true;
+          for (var p = 0; p < 24; p++) {
+            setTimeout(function() {
+              createPetal(Math.random() * window.innerWidth, Math.random() * (window.innerHeight * 0.4));
+            }, p * 55);
+          }
+        }
+      });
+    }, { threshold: 0.18 });
+
+    var eventsEl = document.getElementById('events');
+    if (eventsEl) eventsObserver.observe(eventsEl);
+
+    var weddingObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && !hasBurstedWedding) {
+          hasBurstedWedding = true;
+          for (var p = 0; p < 30; p++) {
+            setTimeout(function() {
+              createPetal(Math.random() * window.innerWidth, Math.random() * (window.innerHeight * 0.35));
+            }, p * 45);
+          }
+        }
+      });
+    }, { threshold: 0.35 });
+
+    var weddingCard = document.getElementById('event-subhalagnam');
+    if (weddingCard) weddingObserver.observe(weddingCard);
   }
+
+  // ============================================
+  // ADVANCED SCROLL ANIMATION CONTROLLERS
+  // Reference: ritvik-weds-vineesha
+  // ============================================
+
+  // 1. Dynamic Atmospheric Scene Glow on Scroll
+  var sceneSections = document.querySelectorAll('[data-scene]');
+  var currentScene = 'royal';
+  function updateScene() {
+    var probeY = window.scrollY + window.innerHeight * 0.45;
+    for (var s = sceneSections.length - 1; s >= 0; s--) {
+      var sec = sceneSections[s];
+      var top = sec.getBoundingClientRect().top + window.scrollY;
+      if (probeY >= top - 80) {
+        var sc = sec.getAttribute('data-scene');
+        if (sc && sc !== currentScene) {
+          currentScene = sc;
+          document.body.setAttribute('data-scene', sc);
+        }
+        break;
+      }
+    }
+  }
+
+  // 2. Active Illuminated Timeline Progress Thread
+  var timelineEl = document.getElementById('weddingTimeline');
+  var timelineProgress = document.getElementById('timelineProgress');
+  function updateTimelineProgress() {
+    if (!timelineEl || !timelineProgress) return;
+    var rect = timelineEl.getBoundingClientRect();
+    var windowH = window.innerHeight;
+    if (rect.top < windowH * 0.75 && rect.bottom > windowH * 0.2) {
+      var totalH = rect.height;
+      var currentProgress = (windowH * 0.55 - rect.top) / totalH;
+      currentProgress = Math.max(0, Math.min(1, currentProgress));
+      timelineProgress.style.height = (currentProgress * 100) + '%';
+    } else if (rect.top >= windowH * 0.75) {
+      timelineProgress.style.height = '0%';
+    } else if (rect.bottom <= windowH * 0.2) {
+      timelineProgress.style.height = '100%';
+    }
+  }
+
+  // 3. Rotating Royal Wedding Seal Badge (with Scroll Momentum)
+  var weddingSeal = document.getElementById('weddingSeal');
+  var lastScrollForSeal = window.scrollY;
+  var sealRotation = 0;
+  function updateWeddingSeal() {
+    if (!weddingSeal) return;
+    var scrolled = window.scrollY;
+    if (scrolled > 160) {
+      weddingSeal.classList.add('is-shown');
+    } else {
+      weddingSeal.classList.remove('is-shown');
+    }
+    var delta = scrolled - lastScrollForSeal;
+    lastScrollForSeal = scrolled;
+    sealRotation += delta * 0.4;
+    var sealSvg = weddingSeal.querySelector('svg');
+    if (sealSvg) {
+      sealSvg.style.transform = 'rotate(' + (sealRotation % 360) + 'deg)';
+    }
+  }
+
+  // 4. Editorial Parallax on Our Story Portraits
+  var storyPhotoCards = document.querySelectorAll('.story-photo-card');
+  var storySection = document.getElementById('story');
+  function updateStoryParallax() {
+    if (!storySection || storyPhotoCards.length < 2 || window.innerWidth < 768) return;
+    var rect = storySection.getBoundingClientRect();
+    var winH = window.innerHeight;
+    if (rect.top < winH && rect.bottom > 0) {
+      var progress = (winH - rect.top) / (winH + rect.height) - 0.5;
+      storyPhotoCards[0].style.transform = 'translateY(' + (-progress * 26) + 'px)';
+      storyPhotoCards[1].style.transform = 'translateY(' + (progress * 26) + 'px)';
+    }
+  }
+
+  // Unified 60fps Scroll Runner
+  var isScrollTicking = false;
+  window.addEventListener('scroll', function() {
+    if (!isScrollTicking) {
+      requestAnimationFrame(function() {
+        updateScene();
+        updateTimelineProgress();
+        updateWeddingSeal();
+        updateStoryParallax();
+        isScrollTicking = false;
+      });
+      isScrollTicking = true;
+    }
+  }, { passive: true });
+
+  // Initial call on load
+  updateScene();
+  updateTimelineProgress();
+  updateWeddingSeal();
 
 
 

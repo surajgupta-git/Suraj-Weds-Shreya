@@ -2709,7 +2709,8 @@ a {
       width: '1',
       videoId: 'DYcBV9OoAag',
       playerVars: {
-        'autoplay': 0,
+        'autoplay': 1,
+        'start': 10,
         'controls': 0,
         'disablekb': 1,
         'fs': 0,
@@ -2720,10 +2721,11 @@ a {
         'rel': 0
       },
       events: {
-        'onReady': function() {
-          if (userInteracted) {
-            startPlayback();
-          }
+        'onReady': function(event) {
+          try {
+            event.target.seekTo(10, true);
+            event.target.playVideo();
+          } catch (e) {}
         },
         'onStateChange': function(event) {
           if (event.data === YT.PlayerState.PLAYING) {
@@ -2732,7 +2734,11 @@ a {
             musicEq.style.display = 'flex';
             musicLabel.textContent = 'Kalyanam Vybhogam ♪';
             musicWidget.style.borderColor = '#FFD700';
-          } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+          } else if (event.data === YT.PlayerState.ENDED) {
+            // Loop seamlessly from second 10
+            event.target.seekTo(10, true);
+            event.target.playVideo();
+          } else if (event.data === YT.PlayerState.PAUSED) {
             isMusicPlaying = false;
             musicIcon.style.display = 'block';
             musicIcon.textContent = '🔇';
@@ -2748,6 +2754,10 @@ a {
   function startPlayback() {
     if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
       try {
+        var currentTime = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
+        if (currentTime < 10) {
+          ytPlayer.seekTo(10, true);
+        }
         ytPlayer.playVideo();
       } catch (err) {
         console.log('Playback error:', err);
@@ -2789,17 +2799,19 @@ a {
     });
   }
 
-  // Attempt to start music smoothly on first touch/click anywhere on page
+  // Trigger autoplay on first gesture (scroll, touch, click, pointer) across the page
+  var gestureEvents = ['click', 'touchstart', 'pointerdown', 'scroll'];
   function firstInteractionPlay() {
-    if (!userInteracted) {
-      userInteracted = true;
+    if (!isMusicPlaying) {
       startPlayback();
     }
-    window.removeEventListener('click', firstInteractionPlay);
-    window.removeEventListener('touchstart', firstInteractionPlay);
+    gestureEvents.forEach(function(evt) {
+      window.removeEventListener(evt, firstInteractionPlay);
+    });
   }
-  window.addEventListener('click', firstInteractionPlay, { once: true, passive: true });
-  window.addEventListener('touchstart', firstInteractionPlay, { once: true, passive: true });
+  gestureEvents.forEach(function(evt) {
+    window.addEventListener(evt, firstInteractionPlay, { once: true, passive: true });
+  });
 
   // ============================================
   // SPARKLES (subtle decorative touches)
